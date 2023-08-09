@@ -7,6 +7,33 @@ router.use((req, res, next) => {
   next();
 });
 
+// get all courses
+router.get("/", async (req, res) => {
+  // populate -> query object(thenable object)
+  try {
+    let coursesFound = await Course.find()
+      .populate("instructor", ["username", "email"])
+      .exec();
+    return res.send(coursesFound);
+  } catch (e) {
+    return res.status(500).send(e);
+  }
+});
+
+// get by id
+router.get("/:_id", async (req, res) => {
+  let { _id } = req.params;
+  try {
+    let courseFound = await Course.findOne({ _id })
+      .populate("instructor", ["email"])
+      .exec();
+    return res.send(courseFound);
+  } catch (e) {
+    return res.status(500).send(e);
+  }
+});
+
+// 新增課程
 router.post("/", async (req, res) => {
   // 驗證數據
   let { error } = courseValidation(req.body);
@@ -22,15 +49,61 @@ router.post("/", async (req, res) => {
       title,
       description,
       price,
-      instructor: req.body._id,
+      instructor: req.user._id,
     });
     let savedCourse = await newCourse.save();
     return res.send({
-      msg: "新課程以保存",
+      msg: "新課程已保存",
       savedCourse,
     });
   } catch (e) {
     return res.status(500).send("無法創建課程...");
+  }
+});
+
+// 更改課程
+router.patch("/:_id", async (req, res) => {
+  // 驗證數據
+  let { error } = courseValidation(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+
+  let { _id } = req.params;
+  try {
+    let courseFound = await Course.findOne({ _id });
+    if (!courseFound) {
+      return res.status(400).send("查無此課程");
+    }
+    // 使用者 == 課程講師
+    if (courseFound.instructor.equals(req.user._id)) {
+      let updatedCourse = await Course.findOneAndUpdate({ _id }, req.body, {
+        new: true,
+        runValidators: true,
+      });
+      return res.send({ msg: "更新成功", updatedCourse });
+    } else {
+      return res.status(403).send("只有此課程講師可以更新");
+    }
+  } catch (e) {
+    return res.status(500).send(e);
+  }
+});
+
+router.delete("/:_id", async (req, res) => {
+  let { _id } = req.params;
+  try {
+    let courseFound = await Course.findOne({ _id }).exec();
+    if (!courseFound) {
+      return res.status(400).send("查無此課程");
+    }
+    // 使用者 == 課程講師
+    if (courseFound.instructor.equals(req.user._id)) {
+      await Course.deleteOne({ _id }).exec();
+      return res.send({ msg: "刪除成功" });
+    } else {
+      return res.status(403).send("只有此課程講師可以刪除");
+    }
+  } catch (e) {
+    return res.status(500).send(e);
   }
 });
 
