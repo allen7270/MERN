@@ -40,6 +40,19 @@ router.get("/student/:_student_id", async (req, res) => {
   return res.send(coursesFound);
 });
 
+// get by className
+router.get("/findByName/:name", async (req, res) => {
+  let { name } = req.params;
+  try {
+    let courseFound = await Course.find({ title: name })
+      .populate("instructor", ["email", "username"])
+      .exec();
+    return res.send(courseFound);
+  } catch (e) {
+    return res.status(500).send(e);
+  }
+});
+
 // get by course id
 router.get("/:_id", async (req, res) => {
   let { _id } = req.params;
