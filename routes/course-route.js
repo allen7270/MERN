@@ -20,7 +20,27 @@ router.get("/", async (req, res) => {
   }
 });
 
-// get by id
+// get by instructor id
+router.get("/instructor/:_instructor_id", async (req, res) => {
+  try {
+    let { _instructor_id } = req.params;
+    let coursesFound = await Course.find({ instructor: _instructor_id })
+      .populate("instructor", ["username", "email"])
+      .exec();
+    return res.send(coursesFound);
+  } catch (e) {}
+});
+
+// get by student id
+router.get("/student/:_student_id", async (req, res) => {
+  let { _student_id } = req.params;
+  let coursesFound = await Course.find({ students: _student_id })
+    .populate("instructor", ["username", "email"])
+    .exec();
+  return res.send(coursesFound);
+});
+
+// get by course id
 router.get("/:_id", async (req, res) => {
   let { _id } = req.params;
   try {

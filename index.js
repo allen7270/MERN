@@ -23,6 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use("/api/user", authRoute);
+
 // jwt 保護
 // request header 內部無jwt -> unauthorized
 app.use(
