@@ -40,8 +40,13 @@ userSchema.methods.isInstroctor = function () {
 };
 
 userSchema.methods.comparePassword = async function (password, cb) {
-  let result = await bcrypt.compare(password, this.password);
-  return cb(null, result);
+  let result;
+  try {
+    result = await bcrypt.compare(password, this.password);
+    return cb(null, result);
+  } catch (e) {
+    return cb(e, result);
+  }
 };
 
 // mongoose middlewares
