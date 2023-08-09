@@ -53,7 +53,8 @@ router.post("/login", async (req, res) => {
         user: foundUser,
       });
     } else {
-      return res.status(401).send(密碼錯誤);
+      console.log("else");
+      return res.status(401).send("密碼錯誤");
     }
   });
 });
