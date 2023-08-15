@@ -10,7 +10,7 @@ require("./config/passport")(passport);
 const cors = require("cors");
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/mernDB")
+  .connect(process.env.MONGODB_CONNECTION)
   .then(() => {
     console.log("connecting to mongodb...");
   })
@@ -32,6 +32,6 @@ app.use(
   courseRoute
 );
 
-app.listen(8080, () => {
-  console.log("bk-server prot 8080 ...");
+app.listen(3000, () => {
+  console.log("bk-server prot 3000 ...");
 });
